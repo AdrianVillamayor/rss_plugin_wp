@@ -1,14 +1,16 @@
 ##  RSS SD
-Contributors: Adrii
-[License URI](http://www.gnu.org/licenses/gpl-2.0.html )
+Contributors: [Adrii](https://github.com/AdrianVillamayor/)
+
+[License URI](http://www.gnu.org/licenses/gpl-2.0.html)
 ---
 
-#### Description
+### Description
 
 A simple rss reader with the possibility of using keywords with a shortcode assembly
+
 ---
 
-#### Installation
+### Installation
 
 Installing "RSS SD" can be done either by searching for "RSS SD" via the "Plugins > Add New" screen in your WordPress dashboard, or by using the following steps:
 
@@ -17,7 +19,7 @@ Installing "RSS SD" can be done either by searching for "RSS SD" via the "Plugin
 1. Activate the plugin through the 'Plugins' menu in WordPress
 ---
 
-#### How to use it?
+### How to use it?
 
 Within the block use the following element
 
