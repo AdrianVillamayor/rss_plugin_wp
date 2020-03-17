@@ -50,6 +50,7 @@ function rss_sd()
 
 function render_xml($url, $keyword)
 {
+	$lang = wpml_get_language_information();
 
 	$atributos = shortcode_atts(
 		array(
@@ -61,23 +62,19 @@ function render_xml($url, $keyword)
 	);
 
 	$url = $atributos['url'];
+	$words[] = $atributos['keyword'];
 
-	if($atributos['keyword'] != ""){
-
-		$explode = explode("," , ($atributos['keyword']));
-		if(!empty($explode)){
+	if ($atributos['keyword'] != "") {
+		$explode = explode(",", ($atributos['keyword']));
+		if (!empty($explode)) {
 			$words = $explode;
-		}else{
-			$words[] = $atributos['keyword'];
 		}
-	}else{
-		$words[] = $atributos['keyword'];
 	}
-	
+
 	$xmlDoc = new DOMDocument();
 	$source = trim(file_get_contents($url));
 	$xmlDoc->loadXML($source);
-	
+
 	if ($xmlDoc->getElementsByTagName('feed')->length) {
 		$type = 'atom';
 	} elseif ($xmlDoc->getElementsByTagName('rss')->length) {
@@ -85,76 +82,50 @@ function render_xml($url, $keyword)
 	} else {
 		$type = '';
 	}
-	
-	if ($type === 'atom') {
-		$rssTitle = getAttribute($xmlDoc->getElementsByTagName('title'));
-		$rssLink = getAttribute($xmlDoc->getElementsByTagName('link'), 'href');
-		$rssDescription = '';
-		$items = $xmlDoc->getElementsByTagName('entry');
-		$countItems = ($xmlDoc->getElementsByTagName('entry')->length);
-		$combineItems = '';
-	
-		for ($i = 0; $i < $countItems; $i++) {
-			$item = $items->item($i);
-			$title = htmlspecialchars(getAttribute($item->getElementsByTagName('title')));
-			$link = htmlspecialchars(getAttribute($item->getElementsByTagName('link'), 'href'));
-			$description = htmlspecialchars(getAttribute($item->getElementsByTagName('content')));
-			$pubDate = getAttribute($item->getElementsByTagName('published'));
-			$updated = getAttribute($item->getElementsByTagName('updated'));
-			$published = $pubDate ? $pubDate : $updated;
-	
-			if (!stristrArray($title, $words) && !(stristrArray($description, $words))) {
-				$combineItems .= '<div class="gdlr-core-blog-full-content-wrap" style="margin-bottom: 5rem;">
-				<div class="gdlr-core-blog-full-head clearfix">
-					<div class="gdlr-core-blog-full-head-right">
-						<h3 class="gdlr-core-blog-title gdlr-core-skin-title" style="font-size: 28px ;"><a
-								href="' . $link . '" target="_blank" rel="noopener noreferrer">' . $title . '</a>
-						</h3>
-						<div class="gdlr-core-blog-info-wrapper gdlr-core-skin-divider">
-							<span class="gdlr-core-blog-info gdlr-core-blog-info-font gdlr-core-skin-caption gdlr-core-blog-info-category">' . strip_tags($published) . '</span>
-						</div> 
-					</div>
-				</div>
-				<div class="gdlr-core-blog-content">' . strip_tags($description) . '</div>
-			</div>';
-			}
-		}
-	} elseif ($type === 'rss') {
-		$channel = $xmlDoc->getElementsByTagName('channel')->item(0);
-		$rssTitle = getAttribute($channel->getElementsByTagName('title'));
-		$rssLink = getAttribute($channel->getElementsByTagName('link'));
-		$rssDescription = getAttribute($channel->getElementsByTagName('description'));
-		$items = $xmlDoc->getElementsByTagName('item');
-		$countItems = ($xmlDoc->getElementsByTagName('item')->length);
-		$combineItems = '';
-	
-		for ($i = 0; $i < $countItems; $i++) {
-			$item = $items->item($i);
-			$title = htmlspecialchars(getAttribute($item->getElementsByTagName('title')));
-			$link = htmlspecialchars(getAttribute($item->getElementsByTagName('link')));
-			$description1 = htmlspecialchars(getAttribute($item->getElementsByTagName('description')));
-			$description2 = htmlspecialchars(getAttribute($item->getElementsByTagName('encoded')));
-			$description = $description1 ? $description1 : $description2;
-			$pubDate = getAttribute($item->getElementsByTagName('pubDate'));
-	
-			if (stristrArray($title, $words) && (stristrArray($description, $words))) {
-				$combineItems .= '<div class="gdlr-core-blog-full-content-wrap" style="margin-bottom: 5rem;">
-				<div class="gdlr-core-blog-full-head clearfix">
-					<div class="gdlr-core-blog-full-head-right">
-						<h3 class="gdlr-core-blog-title gdlr-core-skin-title" style="font-size: 28px ;"><a
-								href="' . $link . '" target="_blank" rel="noopener noreferrer">' . $title . '</a>
-						</h3>
-						<div class="gdlr-core-blog-info-wrapper gdlr-core-skin-divider">
-							<span class="gdlr-core-blog-info gdlr-core-blog-info-font gdlr-core-skin-caption gdlr-core-blog-info-category">' . $pubDate . '</span>
-						</div> 
-					</div>
-				</div>
-				<div class="gdlr-core-blog-content">' . strip_tags($description) . '</div>
-			</div>';
-			}
 
-			
-		}
+	switch ($type) {
+		case 'atom':
+			$items = $xmlDoc->getElementsByTagName('entry');
+			$countItems = ($xmlDoc->getElementsByTagName('entry')->length);
+			$combineItems = '';
+
+			for ($i = 0; $i < $countItems; $i++) {
+				$item = $items->item($i);
+				$title = getAttribute($item->getElementsByTagName('title'));
+				$link = getAttribute($item->getElementsByTagName('link'), 'href');
+				$description = getAttribute($item->getElementsByTagName('content'));
+				$pubDate = getAttribute($item->getElementsByTagName('published'));
+				$updated = getAttribute($item->getElementsByTagName('updated'));
+				$published = $pubDate ? $pubDate : $updated;
+
+				if (!stristrArray($title, $words) && !(stristrArray($description, $words))) {
+					$combineItems .= creatorPost($title, $link, $published, $description);
+				}
+			}
+			break;
+
+		case 'rss':
+			$items = $xmlDoc->getElementsByTagName('item');
+			$countItems = ($xmlDoc->getElementsByTagName('item')->length);
+			$combineItems = '';
+
+			for ($i = 0; $i < $countItems; $i++) {
+				$item = $items->item($i);
+				$title = getAttribute($item->getElementsByTagName('title'));
+				$link = getAttribute($item->getElementsByTagName('link'));
+				$description1 = getAttribute($item->getElementsByTagName('description'));
+				$description2 = getAttribute($item->getElementsByTagName('encoded'));
+				$description = $description1 ? $description1 : $description2;
+				$pubDate = getAttribute($item->getElementsByTagName('pubDate'));
+
+				$date = new DateTime($pubDate);
+				$pubDate = $date->format('d F, Y H:i:s');
+
+				if (stristrArray($title, $words) && (stristrArray($description, $words))) {
+					$combineItems .= creatorPost($title, $link, $pubDate, $description);
+				}
+			}
+			break;
 	}
 
 	if ($type) {
@@ -163,7 +134,7 @@ function render_xml($url, $keyword)
 		$result = 'undefined type';
 	}
 
-	return $result	;
+	return $result;
 }
 
 
@@ -172,37 +143,75 @@ add_shortcode("rss-sd", 'render_xml');
 rss_sd();
 
 
-function stristrArray($haystack, $needle) {
-    if (!is_array($needle)) {
-      $needle = [$needle];
-    }
-    foreach ($needle as $searchstring) {
-      $found = stristr($haystack, $searchstring);
-      if ($found) {
-        return $found;
-      }
-    }
-    return false;
-  }
+function stristrArray($haystack, $needle)
+{
+	if($needle[0] != ""){
+		if (!is_array($needle)) {
+			$needle = [$needle];
+		}
+	
+		foreach ($needle as $searchstring) {
+			$found = stristr($haystack, $searchstring);
+			if ($found) {
+				return $found;
+			}
+		}
 
-  function getAttribute($string, $attribute = '') {
-    if ($string->length === 0) {
-      $result = '';
-    } else {
-      if ($attribute) {
-        $result = $string->item(0)->getAttribute($attribute);
-      } else {
-        if ($string->item(0)->childNodes->item(1)) {
-          $result = $string->item(0)->childNodes->item(1)->nodeValue;
-        } elseif ($string->item(0)->childNodes->item(0)) {
-          $result = $string->item(0)->childNodes->item(0)->nodeValue;
-        } else {
-          $result = '';
-        }
-      }
-    }
-    return $result;
-  }
+		return false;
+	}else{
+		return true;
+	}
+
+}
+
+function getAttribute($string, $attribute = '')
+{
+	if ($string->length === 0) {
+		$result = '';
+	} else {
+		if ($attribute) {
+			$result = $string->item(0)->getAttribute($attribute);
+		} else {
+			if ($string->item(0)->childNodes->item(1)) {
+				$result = $string->item(0)->childNodes->item(1)->nodeValue;
+			} elseif ($string->item(0)->childNodes->item(0)) {
+				$result = $string->item(0)->childNodes->item(0)->nodeValue;
+			} else {
+				$result = '';
+			}
+		}
+	}
+	return $result;
+}
 
 
-  
+
+
+function fetch_string($content)
+{
+	$content = preg_replace('@<script[^>]*?>.*?</script>@si', '', $content);
+	$content = preg_replace('@<style[^>]*?>.*?</style>@si', '', $content);
+	$content = strip_tags($content);
+	$content = trim($content);
+	return $content;
+}
+
+function creatorPost($title, $link, $date, $description)
+{
+	$item = '
+	<div class="gdlr-core-blog-full-content-wrap" style="margin-bottom: 5rem;">
+		<div class="gdlr-core-blog-full-head clearfix">
+			<div class="gdlr-core-blog-full-head-right">
+				<h3 class="gdlr-core-blog-title gdlr-core-skin-title" style="font-size: 28px ;"><a
+						href="' . $link . '" target="_blank" rel="noopener noreferrer">' . $title . '</a>
+				</h3>
+				<div class="gdlr-core-blog-info-wrapper gdlr-core-skin-divider">
+					<span class="gdlr-core-blog-info gdlr-core-blog-info-font gdlr-core-skin-caption gdlr-core-blog-info-category">' . $date . '</span>
+				</div> 
+			</div>
+		</div>
+		<div class="gdlr-core-blog-content">' . fetch_string($description) . '</div>
+	</div>';
+
+	return $item;
+}
