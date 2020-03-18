@@ -83,6 +83,8 @@ function render_xml($url, $keyword)
 		$type = '';
 	}
 
+	setlocale(LC_ALL, $lang['locale']);
+
 	switch ($type) {
 		case 'atom':
 			$items = $xmlDoc->getElementsByTagName('entry');
@@ -137,19 +139,78 @@ function render_xml($url, $keyword)
 	return $result;
 }
 
+function render_url($url)
+{
+	$lang = wpml_get_language_information();
+
+	$atributos = shortcode_atts(
+		array(
+			'url' => 'No Data'
+		),
+		$url
+	);
+
+	$url = $atributos['url'];
+
+	$content = file_get_contents($url);
+
+	$doc = new DOMDocument();
+
+	// squelch HTML5 errors
+	@$doc->loadHTML($content);
+
+
+	$meta = $doc->getElementsByTagName('meta');
+	foreach ($meta as $element) {
+		$tag = [];
+		foreach ($element->attributes as $node) {
+			$tag[$node->name] = $node->value;
+		}
+		$tags[] = $tag;
+	}
+
+
+	foreach ($tags as $key ) {
+		switch ($key['property']) {
+			case 'og:title':
+				$title = $key['content'];
+				break;
+
+			case 'og:updated_time':
+				$time = $key['content'];
+				break;
+
+			case 'og:description':
+				$desc = $key['content'];
+				break;
+
+			case 'og:image':
+				$img = $key['content'];
+				break;
+		}
+	}
+
+	$date = new DateTime($time);
+	$pubDate = $date->format('d F, Y H:i:s');
+
+	$combineItems = creatorPost($title, $url, $pubDate, $desc);
+
+	return $combineItems;
+}
 
 add_shortcode("rss-sd", 'render_xml');
+add_shortcode("url-sd", 'render_url');
 
 rss_sd();
 
 
 function stristrArray($haystack, $needle)
 {
-	if($needle[0] != ""){
+	if ($needle[0] != "") {
 		if (!is_array($needle)) {
 			$needle = [$needle];
 		}
-	
+
 		foreach ($needle as $searchstring) {
 			$found = stristr($haystack, $searchstring);
 			if ($found) {
@@ -158,10 +219,9 @@ function stristrArray($haystack, $needle)
 		}
 
 		return false;
-	}else{
+	} else {
 		return true;
 	}
-
 }
 
 function getAttribute($string, $attribute = '')
