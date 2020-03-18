@@ -3,10 +3,10 @@
 /**
  * Plugin Name: RSS SD
  * Version: 1.0.0
- * Plugin URI: http://www.hughlashbrooke.com/
- * Description: This is your starter template for your next WordPress plugin.
- * Author: Hugh Lashbrooke
- * Author URI: http://www.hughlashbrooke.com/
+ * Plugin URI: https://github.com/AdrianVillamayor/rss_plugin_wp
+ * Description: A simple rss reader with the possibility of using keywords with a shortcode assembly
+ * Author: Adrii
+ * Author URI: https://github.com/AdrianVillamayor/
  * Requires at least: 4.0
  * Tested up to: 4.0
  *
@@ -14,7 +14,7 @@
  * Domain Path: /lang/
  *
  * @package WordPress
- * @author Hugh Lashbrooke
+ * @author Adrián Villamayor (Adrii)
  * @since 1.0.0
  */
 
@@ -243,8 +243,6 @@ function getAttribute($string, $attribute = '')
 	}
 	return $result;
 }
-
-
 
 
 function fetch_string($content)

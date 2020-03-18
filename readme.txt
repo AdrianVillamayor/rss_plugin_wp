@@ -1,7 +1,6 @@
 === RSS SD ===
-Contributors: hlashbrooke
-Donate link: http://www.hughlashbrooke.com/donate
-Tags: wordpress, plugin, template
+Contributors: Adrii
+Tags: wordpress, plugin, rss, url
 Requires at least: 3.9
 Tested up to: 4.0
 Stable tag: 1.0
