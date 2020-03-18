@@ -21,8 +21,14 @@ Installing "RSS SD" can be done either by searching for "RSS SD" via the "Plugin
 
 ### How to use it?
 
-Within the block use the following element
+* To load an rss with or without keyword
 
 ```php
 [rss-sd url = "https://blog.socialdiabetes.com/feed/" keyword="diabetes"]
+```
+
+* To load an url
+
+```php
+[url-sd url = "http://prensa.fmdiabetes.org/precauciones-para-afrontar-el-virus-covid-19/"]
 ```
