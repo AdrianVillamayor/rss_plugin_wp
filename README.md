@@ -6,8 +6,7 @@ Contributors: [Adrii](https://github.com/AdrianVillamayor/)
 
 ### Description
 
-A simple rss reader with the possibility of using keywords with a shortcode assembly
-
+A simple rss reader with the possibility of using keywords with a shortcode assembly.
 ---
 
 ### Installation
@@ -24,11 +23,26 @@ Installing "RSS SD" can be done either by searching for "RSS SD" via the "Plugin
 * To load an rss with or without keyword
 
 ```php
-[rss-sd url = "https://blog.socialdiabetes.com/feed/" keyword="diabetes"]
+   /**
+    * @param string url => Url where you point to mount all the content
+    * @param string keyword => Filter the news by showing only the ones that match. Use commas to use more than one.
+    */
+
+    [rss-sd url = "https://blog.socialdiabetes.com/feed/" keyword="diabetes,control"]
 ```
 
-* To load an url
+* To load an url with or withou personalized information
 
 ```php
-[url-sd url = "http://prensa.fmdiabetes.org/precauciones-para-afrontar-el-virus-covid-19/"]
+
+    /**
+    * @param string url   => Url where you point to mount all the content
+    * @param string title => Custom title
+    * @param string desc  => Custom description
+    * @param string time  => Custom date
+    */
+
+    [url-sd url = "https://blog.socialdiabetes.com/en/how-to-connect-with-your-hcp/"]
+
+    [url-sd url = "https://blog.socialdiabetes.com/en/how-to-connect-with-your-hcp/" title="How To Connect With Your HCP" desc="SocialDiabetes is the solution for diabetes care." time="15 MAY, 2019"]
 ```

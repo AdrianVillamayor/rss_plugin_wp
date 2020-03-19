@@ -71,71 +71,74 @@ function render_xml($url, $keyword)
 		}
 	}
 
-	$xmlDoc = new DOMDocument();
-	$source = trim(file_get_contents($url));
-	$xmlDoc->loadXML($source);
+	$result = '';
 
-	if ($xmlDoc->getElementsByTagName('feed')->length) {
-		$type = 'atom';
-	} elseif ($xmlDoc->getElementsByTagName('rss')->length) {
-		$type = 'rss';
-	} else {
-		$type = '';
-	}
+	if ($url != 'No Data') {
+		$xmlDoc = new DOMDocument();
+		$source = trim(file_get_contents($url));
+		$xmlDoc->loadXML($source);
 
-	setlocale(LC_ALL, $lang['locale']);
+		if ($xmlDoc->getElementsByTagName('feed')->length) {
+			$type = 'atom';
+		} elseif ($xmlDoc->getElementsByTagName('rss')->length) {
+			$type = 'rss';
+		} else {
+			$type = '';
+		}
 
-	switch ($type) {
-		case 'atom':
-			$items = $xmlDoc->getElementsByTagName('entry');
-			$countItems = ($xmlDoc->getElementsByTagName('entry')->length);
-			$combineItems = '';
+		setlocale(LC_ALL, $lang['locale']);
 
-			for ($i = 0; $i < $countItems; $i++) {
-				$item = $items->item($i);
-				$title = getAttribute($item->getElementsByTagName('title'));
-				$link = getAttribute($item->getElementsByTagName('link'), 'href');
-				$description = getAttribute($item->getElementsByTagName('content'));
-				$pubDate = getAttribute($item->getElementsByTagName('published'));
-				$updated = getAttribute($item->getElementsByTagName('updated'));
-				$published = $pubDate ? $pubDate : $updated;
+		switch ($type) {
+			case 'atom':
+				$items = $xmlDoc->getElementsByTagName('entry');
+				$countItems = ($xmlDoc->getElementsByTagName('entry')->length);
+				$combineItems = '';
 
-				if (!stristrArray($title, $words) && !(stristrArray($description, $words))) {
-					$combineItems .= creatorPost($title, $link, $published, $description);
+				for ($i = 0; $i < $countItems; $i++) {
+					$item = $items->item($i);
+					$title = getAttribute($item->getElementsByTagName('title'));
+					$link = getAttribute($item->getElementsByTagName('link'), 'href');
+					$description = getAttribute($item->getElementsByTagName('content'));
+					$pubDate = getAttribute($item->getElementsByTagName('published'));
+					$updated = getAttribute($item->getElementsByTagName('updated'));
+					$published = $pubDate ? $pubDate : $updated;
+
+					if (!stristrArray($title, $words) && !(stristrArray($description, $words))) {
+						$combineItems .= creatorPost($title, $link, $published, $description);
+					}
 				}
-			}
-			break;
+				break;
 
-		case 'rss':
-			$items = $xmlDoc->getElementsByTagName('item');
-			$countItems = ($xmlDoc->getElementsByTagName('item')->length);
-			$combineItems = '';
+			case 'rss':
+				$items = $xmlDoc->getElementsByTagName('item');
+				$countItems = ($xmlDoc->getElementsByTagName('item')->length);
+				$combineItems = '';
 
-			for ($i = 0; $i < $countItems; $i++) {
-				$item = $items->item($i);
-				$title = getAttribute($item->getElementsByTagName('title'));
-				$link = getAttribute($item->getElementsByTagName('link'));
-				$description1 = getAttribute($item->getElementsByTagName('description'));
-				$description2 = getAttribute($item->getElementsByTagName('encoded'));
-				$description = $description1 ? $description1 : $description2;
-				$pubDate = getAttribute($item->getElementsByTagName('pubDate'));
+				for ($i = 0; $i < $countItems; $i++) {
+					$item = $items->item($i);
+					$title = getAttribute($item->getElementsByTagName('title'));
+					$link = getAttribute($item->getElementsByTagName('link'));
+					$description1 = getAttribute($item->getElementsByTagName('description'));
+					$description2 = getAttribute($item->getElementsByTagName('encoded'));
+					$description = $description1 ? $description1 : $description2;
+					$pubDate = getAttribute($item->getElementsByTagName('pubDate'));
 
-				$date = new DateTime($pubDate);
-				$pubDate = $date->format('d F, Y H:i:s');
+					$date = new DateTime($pubDate);
+					$pubDate = $date->format('d F, Y H:i:s');
 
-				if (stristrArray($title, $words) && (stristrArray($description, $words))) {
-					$combineItems .= creatorPost($title, $link, $pubDate, $description);
+					if (stristrArray($title, $words) && (stristrArray($description, $words))) {
+						$combineItems .= creatorPost($title, $link, $pubDate, $description);
+					}
 				}
-			}
-			break;
-	}
+				break;
+		}
 
-	if ($type) {
-		$result = $combineItems;
-	} else {
-		$result = 'undefined type';
+		if ($type) {
+			$result = $combineItems;
+		} else {
+			$result = 'undefined type';
+		}
 	}
-
 	return $result;
 }
 
@@ -145,55 +148,85 @@ function render_url($url)
 
 	$atributos = shortcode_atts(
 		array(
-			'url' => 'No Data'
+			'url'   => 'No Data',
+			'title' => '',
+			'desc'	=> '',
+			'time'	=> ''
 		),
 		$url
 	);
 
 	$url = $atributos['url'];
 
-	$content = file_get_contents($url);
+	$combineItems = '';
+	$title = $atributos['title'];
+	$time = $atributos['time'];
+	$desc = $atributos['desc'];
+	
+	$pubDate = '';
 
-	$doc = new DOMDocument();
+	if ($url != 'No Data') {
+		$content = file_get_contents($url);
 
-	// squelch HTML5 errors
-	@$doc->loadHTML($content);
+		$doc = new DOMDocument();
 
+		@$doc->loadHTML($content);
 
-	$meta = $doc->getElementsByTagName('meta');
-	foreach ($meta as $element) {
-		$tag = [];
-		foreach ($element->attributes as $node) {
-			$tag[$node->name] = $node->value;
+		$meta = $doc->getElementsByTagName('meta');
+		foreach ($meta as $element) {
+			$tag = [];
+			foreach ($element->attributes as $node) {
+				$tag[$node->name] = $node->value;
+			}
+			$tags[] = $tag;
 		}
-		$tags[] = $tag;
+
+		if (!empty($tags)) {
+			foreach ($tags as $key) {
+				switch ($key['property']) {
+					case 'og:title':
+						$title = $key['content'];
+						break;
+
+					case 'og:updated_time':
+						$time = $key['content'];
+						break;
+
+					case 'og:description':
+					case 'description':
+						$desc = $key['content'];
+						break;
+
+					case 'og:image':
+						$img = $key['content'];
+						break;
+				}
+			}
+		}
+
+		if ($title == "") {
+			if (strlen($content) > 0) {
+				$content = trim(preg_replace('/\s+/', ' ', $content)); // supports line breaks inside <title>
+				preg_match("/\<title\>(.*)\<\/title\>/i", $content, $title); // ignore case
+				$title = $title[1];
+			}
+		}
+
+		setlocale(LC_ALL, $lang['locale']);
+
+		if($time != ''){
+			if(checkIsAValidDate(($time))){
+				$date = new DateTime($time);
+				$pubDate = $date->format('d F, Y H:i:s');
+			}
+			
+			$pubDate = $time;
+		}
+		
+
+		$combineItems = creatorPost($title, $url, $pubDate, $desc);
 	}
 
-
-	foreach ($tags as $key ) {
-		switch ($key['property']) {
-			case 'og:title':
-				$title = $key['content'];
-				break;
-
-			case 'og:updated_time':
-				$time = $key['content'];
-				break;
-
-			case 'og:description':
-				$desc = $key['content'];
-				break;
-
-			case 'og:image':
-				$img = $key['content'];
-				break;
-		}
-	}
-
-	$date = new DateTime($time);
-	$pubDate = $date->format('d F, Y H:i:s');
-
-	$combineItems = creatorPost($title, $url, $pubDate, $desc);
 
 	return $combineItems;
 }
@@ -256,6 +289,10 @@ function fetch_string($content)
 
 function creatorPost($title, $link, $date, $description)
 {
+	if($description == ""){
+		$description =  __( 'Enter the post to know more', 'rss-sd' );
+	}
+
 	$item = '
 	<div class="gdlr-core-blog-full-content-wrap" style="margin-bottom: 5rem;">
 		<div class="gdlr-core-blog-full-head clearfix">
@@ -272,4 +309,9 @@ function creatorPost($title, $link, $date, $description)
 	</div>';
 
 	return $item;
+}
+
+
+function checkIsAValidDate($myDateString){
+    return (bool)strtotime($myDateString);
 }
