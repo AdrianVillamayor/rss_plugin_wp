@@ -12,6 +12,8 @@ Installing "RSS SD" can be done either by searching for "RSS SD" via the "Plugin
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
 ## Usage
+
+```php
    /**
     * @param string url => Url where you point to mount all the content
     * @param string keyword => Filter the news by showing only the ones that match. Use commas to use more than one.
@@ -22,8 +24,8 @@ Installing "RSS SD" can be done either by searching for "RSS SD" via the "Plugin
 
 * To load an url with or withou personalized information
 
-```php
 
+```php
 /**
   * @param string url   => Url where you point to mount all the content
   * @param string title => Custom title
@@ -35,7 +37,7 @@ Installing "RSS SD" can be done either by searching for "RSS SD" via the "Plugin
  [url-sd url = "https://blog.socialdiabetes.com/en/how-to-connect-with-your-hcp/"]
 
  [url-sd url = "https://blog.socialdiabetes.com/en/how-to-connect-with-your-hcp/" title="How To Connect With Your HCP" desc="SocialDiabetes is the solution for diabetes care." time="15 MAY, 2019"]
-
+```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
