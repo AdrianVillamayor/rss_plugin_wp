@@ -13,20 +13,24 @@ Installing "RSS SD" can be done either by searching for "RSS SD" via the "Plugin
 
 ## Usage
 
+To load a feed url
+
 ```php
    /**
+    *
     * @param string url => Url where you point to mount all the content
     * @param string keyword => Filter the news by showing only the ones that match. Use commas to use more than one.
+    *
     */
 
     [rss-sd url = "https://blog.socialdiabetes.com/feed/" keyword="diabetes,control"]
 ```
 
-* To load an url with or withou personalized information
-
+To load an url with or without personalized information
 
 ```php
 /**
+  *
   * @param string url   => Url where you point to mount all the content
   * @param string title => Custom title
   * @param string desc  => Custom description
