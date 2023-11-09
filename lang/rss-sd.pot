@@ -18,6 +18,11 @@ msgctxt "post type general name"
 msgid "Post Type"
 msgstr ""
 
+
+#: rss-sd.php:293
+msgid "Enter the post to know more"
+msgstr ""
+
 #: classes/post-types/class-rss-sd-post_type.php:53
 #: includes/post-types/class-rss-sd-post_type.php:43
 msgctxt "post type singular name"
